@@ -101,7 +101,7 @@ const (
 	Mode700C Mode = C.CODEC2_MODE_700C
 )
 
-type Codec2 struct {
+type codec2 struct {
 	ptr  *C.codec2
 	mode Mode
 }
@@ -114,13 +114,13 @@ func New(mode Mode) (nb.Codec, error) {
 	ptr := C.codec2_create(C.int(mode))
 	C.codec2_set_natural_or_gray(ptr, 1)
 
-	return &Codec2{
+	return &codec2{
 		ptr:  ptr,
 		mode: mode,
 	}, nil
 }
 
-func (codec *Codec2) Close() error {
+func (codec *codec2) Close() error {
 	if codec.ptr != nil {
 		C.codec2_destroy(codec.ptr)
 		codec.ptr = nil
@@ -128,7 +128,7 @@ func (codec *Codec2) Close() error {
 	return nil
 }
 
-func (codec *Codec2) Decode(dst []int16, src []byte) error {
+func (codec *codec2) Decode(dst []int16, src []byte) error {
 	var (
 		srcLen    = len(src)
 		srcStep   = codec.mode.BytesPerFrame()
@@ -160,12 +160,12 @@ func (codec *Codec2) Decode(dst []int16, src []byte) error {
 	return nil
 }
 
-func (codec *Codec2) DecodeBlockSize() int {
+func (codec *codec2) DecodeBlockSize() int {
 	return codec.mode.BytesPerFrame()
 }
 
 // DecodedLen returns how many samples can be extracted from n bytes of input.
-func (codec *Codec2) DecodedLen(n int) int {
+func (codec *codec2) DecodedLen(n int) int {
 	var (
 		samples = codec.mode.SamplesPerFrame()
 		bytes   = codec.mode.BytesPerFrame()
@@ -176,12 +176,12 @@ func (codec *Codec2) DecodedLen(n int) int {
 	return (n * samples) / bytes
 }
 
-func (codec *Codec2) EncodeBlockSize() int {
+func (codec *codec2) EncodeBlockSize() int {
 	return codec.mode.SamplesPerFrame()
 }
 
 // EncodedLen returns how many bytes are required to encode n samples of input.
-func (codec *Codec2) EncodedLen(n int) int {
+func (codec *codec2) EncodedLen(n int) int {
 	var (
 		samples = codec.mode.SamplesPerFrame()
 		bytes   = codec.mode.BytesPerFrame()
@@ -192,7 +192,7 @@ func (codec *Codec2) EncodedLen(n int) int {
 	return (n * bytes) / samples
 }
 
-func (codec *Codec2) Encode(dst []byte, src []int16) error {
+func (codec *codec2) Encode(dst []byte, src []int16) error {
 	var (
 		srcLen    = len(src)
 		srcStep   = codec.mode.SamplesPerFrame()
@@ -224,13 +224,13 @@ func (codec *Codec2) Encode(dst []byte, src []int16) error {
 	return nil
 }
 
-func (Codec2) Format() voice.Format {
+func (codec2) Format() voice.Format {
 	return voice.Format{
 		Channels: 1,
 		Rate:     8000,
 	}
 }
 
-func (Codec2) Reset() {}
+func (codec2) Reset() {}
 
-var _ nb.Codec = (*Codec2)(nil)
+var _ nb.Codec = (*codec2)(nil)
