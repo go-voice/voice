@@ -10,8 +10,6 @@ import (
 	"github.com/go-voice/voice/internal/tests"
 )
 
-var testModes = []Mode{Mode3200, Mode1600, Mode1200, Mode700C}
-
 func TestMode(t *testing.T) {
 	for mode := Mode3200; mode <= Mode700C; mode++ {
 		t.Run(mode.String(), func(t *testing.T) {
@@ -35,7 +33,10 @@ func TestMode(t *testing.T) {
 	}
 }
 
-var testSuites = []string{"female", "male", "violin"}
+var (
+	testModes  = []Mode{Mode3200, Mode1600, Mode1200, Mode700C}
+	testSuites = []string{"female", "male", "violin"}
+)
 
 func TestDecode(t *testing.T) {
 	for _, suite := range testSuites {

@@ -74,6 +74,12 @@ type Closer interface {
 	Close() error
 }
 
+// CodecCloser is the interface that groups the Codec and the basic Close method.
+type CodecCloser interface {
+	Codec
+	Closer
+}
+
 // Reader is the interface that wraps the basic Read method.
 //
 // Read reads up to len(p) samples into p. It returns the number of samples read
