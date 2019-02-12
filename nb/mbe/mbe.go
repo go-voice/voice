@@ -23,6 +23,7 @@ package mbe
 
 import (
 	"github.com/go-voice/voice"
+	"github.com/go-voice/voice/nb"
 	"github.com/go-voice/voice/nb/mbe/internal/vocoder"
 )
 
@@ -52,41 +53,41 @@ func init() {
 }
 
 // MBE is the basis for all Multi-Band Excitation codecs.
-type MBE struct {
+type mbe struct {
 	coder *vocoder.Vocoder
 	tag   voice.Tag
 }
 
 // NewAMBE3600x2400 returns an AMBE2+ codec at 2400bps.
-func NewAMBE3600x2400(quality int) *MBE {
+func NewAMBE3600x2400(quality int) nb.CodecCloser {
 	return newMBE(quality, voice.AMBE3600x2400)
 }
 
 // NewAMBE3600x2450 returns an AMBE2+ codec at 2450bps.
-func NewAMBE3600x2450(quality int) *MBE {
+func NewAMBE3600x2450(quality int) nb.CodecCloser {
 	return newMBE(quality, voice.AMBE3600x2450)
 }
 
 // NewIMBE7100x4400 returns an IMBE codec with 7100bps voice.
-func NewIMBE7100x4400(quality int) *MBE {
+func NewIMBE7100x4400(quality int) nb.CodecCloser {
 	return newMBE(quality, voice.IMBE7100x4400)
 }
 
 // NewIMBE7200x4400 returns an IMBE codec with 7200bps voice.
-func NewIMBE7200x4400(quality int) *MBE {
+func NewIMBE7200x4400(quality int) nb.CodecCloser {
 	return newMBE(quality, voice.IMBE7200x4400)
 }
 
 // newMBE returns a new MBE codec with the specified quality.
-func newMBE(quality int, tag voice.Tag) *MBE {
-	return &MBE{
+func newMBE(quality int, tag voice.Tag) *mbe {
+	return &mbe{
 		coder: vocoder.New(tag, quality),
 		tag:   tag,
 	}
 }
 
 // Format specifier.
-func (mbe *MBE) Format() voice.Format {
+func (mbe *mbe) Format() voice.Format {
 	return voice.Format{
 		Channels: 1,
 		Rate:     8000,
@@ -94,7 +95,7 @@ func (mbe *MBE) Format() voice.Format {
 }
 
 // Close releases allocated memory.
-func (mbe *MBE) Close() error {
+func (mbe *mbe) Close() error {
 	if mbe.coder != nil {
 		mbe.coder.Close()
 		mbe.coder = nil
@@ -103,22 +104,22 @@ func (mbe *MBE) Close() error {
 }
 
 // Decode a buffer
-func (mbe *MBE) Decode(dst []int16, src []byte) error {
+func (mbe *mbe) Decode(dst []int16, src []byte) error {
 	return mbe.coder.Decode(dst, src)
 }
 
 // Encode a buffer
-func (mbe *MBE) Encode(dst []byte, src []int16) error {
+func (mbe *mbe) Encode(dst []byte, src []int16) error {
 	return mbe.coder.Encode(dst, src)
 }
 
 // DecodeBlockSize is 160 samples per block.
-func (mbe *MBE) DecodeBlockSize() int {
+func (mbe *mbe) DecodeBlockSize() int {
 	return 160
 }
 
 // DecodedLen returns how many samples can be extracted from n bytes of input.
-func (mbe *MBE) DecodedLen(n int) int {
+func (mbe *mbe) DecodedLen(n int) int {
 	blockSize := mbe.EncodeBlockSize()
 	if n%blockSize != 0 {
 		return 0
@@ -127,13 +128,13 @@ func (mbe *MBE) DecodedLen(n int) int {
 }
 
 // EncodeBlockSize is 8 AMBE bytes or 12 IMBE bytes per block.
-func (mbe *MBE) EncodeBlockSize() int {
+func (mbe *mbe) EncodeBlockSize() int {
 	return mbe.coder.EncodeBlockSize()
 }
 
 // EncodedLen returns how many bytes are required to encode n samples of
 // input. If n is not an accepted multiple of block size, 0 is returned.
-func (mbe *MBE) EncodedLen(n int) int {
+func (mbe *mbe) EncodedLen(n int) int {
 	blockSize := mbe.DecodeBlockSize()
 	if n%blockSize != 0 {
 		return 0
@@ -142,7 +143,7 @@ func (mbe *MBE) EncodedLen(n int) int {
 }
 
 // Reset coder state.
-func (mbe *MBE) Reset() {
+func (mbe *mbe) Reset() {
 	if mbe.coder != nil {
 		mbe.coder.Reset()
 	}
