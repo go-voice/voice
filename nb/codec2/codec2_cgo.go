@@ -15,6 +15,10 @@ import (
 	"errors"
 	"fmt"
 	"unsafe"
+
+	"github.com/go-voice/voice"
+
+	"github.com/go-voice/voice/nb"
 )
 
 // Mode setting
@@ -102,7 +106,7 @@ type Codec2 struct {
 	mode Mode
 }
 
-func New(mode Mode) (*Codec2, error) {
+func New(mode Mode) (nb.Codec, error) {
 	if mode < Mode3200 || mode > Mode700C {
 		return nil, errors.New("codec2: unsupported mode")
 	}
@@ -219,3 +223,14 @@ func (codec *Codec2) Encode(dst []byte, src []int16) error {
 
 	return nil
 }
+
+func (Codec2) Format() voice.Format {
+	return voice.Format{
+		Channels: 1,
+		Rate:     8000,
+	}
+}
+
+func (Codec2) Reset() {}
+
+var _ nb.Codec = (*Codec2)(nil)
